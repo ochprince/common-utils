@@ -11,3 +11,4 @@ out/
 .settings
 .vscode
 bin/
+gradle/wrapper/gradle-7.4.2-bin.zip
