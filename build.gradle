@@ -5,18 +5,21 @@
 
 buildscript {
     ext {
-        opensearch_group = "org.opensearch"
-        opensearch_version = System.getProperty("opensearch.version", "2.7.0-SNAPSHOT")
-        isSnapshot = "true" == System.getProperty("build.snapshot", "true")
+        opensearch_group = "com.colasoft.opensearch"
+        opensearch_version = System.getProperty("opensearch.version", "2.7.0")
+        isSnapshot = "true" == System.getProperty("build.snapshot", "false")
         buildVersionQualifier = System.getProperty("build.version_qualifier", "")
         kotlin_version = System.getProperty("kotlin.version", "1.6.10")
     }
 
     repositories {
+        maven {
+            allowInsecureProtocol(true)
+            url 'http://192.168.0.9:8081/nexus/content/groups/public'
+        }
         mavenLocal()
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
-        maven { url "https://aws.oss.sonatype.org/content/repositories/snapshots" }
     }
 
     dependencies {
@@ -34,14 +37,17 @@ plugins {
 }
 
 repositories {
+    maven {
+        allowInsecureProtocol(true)
+        url 'http://192.168.0.9:8081/nexus/content/groups/public'
+    }
     mavenLocal()
     mavenCentral()
     maven { url "https://plugins.gradle.org/m2/" }
-    maven { url "https://aws.oss.sonatype.org/content/repositories/snapshots" }
 }
 
 allprojects {
-    group 'org.opensearch.commons'
+    group 'com.colasoft.opensearch.commons'
     version = opensearch_version.tokenize('-')[0] + '.0'
     if (buildVersionQualifier) {
         version += "-${buildVersionQualifier}"
@@ -70,13 +76,13 @@ configurations {
 }
 
 dependencies {
-    compileOnly "org.opensearch.client:opensearch-rest-high-level-client:${opensearch_version}"
+    compileOnly "com.colasoft.opensearch.client:opensearch-rest-high-level-client:${opensearch_version}"
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}"
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-common:${kotlin_version}"
     compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3" // ${kotlin_version} does not work for coroutines
     compileOnly "com.cronutils:cron-utils:9.1.6"
     compileOnly "commons-validator:commons-validator:1.7"
-    testImplementation "org.opensearch.test:framework:${opensearch_version}"
+    testImplementation "com.colasoft.opensearch.test:framework:${opensearch_version}"
     testImplementation "org.jetbrains.kotlin:kotlin-test:${kotlin_version}"
     testImplementation "org.mockito:mockito-core:3.10.0"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
@@ -166,18 +172,19 @@ publishing {
             url = "${rootProject.buildDir}/local-staging-repo"
         }
         maven {
-            name = "Snapshots"
-            url = "https://aws.oss.sonatype.org/content/repositories/snapshots"
+            setAllowInsecureProtocol(true)
+            name = 'release'
+            url = 'http://192.168.0.9:8081/nexus/content/repositories/sm_release_repositories'
             credentials {
-                username "$System.env.SONATYPE_USERNAME"
-                password "$System.env.SONATYPE_PASSWORD"
+                username 'sm_admin'
+                password 'p[-sdko12}(9K'
             }
         }
     }
     publications {
         shadow(MavenPublication) {
             project.shadow.component(it)
-            groupId = 'org.opensearch'
+            groupId = 'com.colasoft.opensearch'
             artifactId = 'common-utils'
 
             artifact sourcesJar
